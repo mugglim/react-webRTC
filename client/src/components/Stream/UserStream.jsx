@@ -49,7 +49,6 @@ export default function UserStream() {
 	return (
 		<Stream>
 			<Video ref={videoRef} autoPlay />
-
 			<ButtonWrap>
 				<Button onClick={handleVideoToggle}>Video Toggle</Button>
 			</ButtonWrap>
