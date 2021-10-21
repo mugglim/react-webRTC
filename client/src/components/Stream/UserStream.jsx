@@ -42,7 +42,6 @@ export default function UserStream() {
 	const handleVideoToggle = () => {
 		if (stream) {
 			stream.getVideoTracks().forEach(track => (track.enabled = !track.enabled));
-			console.log(stream);
 		}
 	};
 
@@ -76,11 +75,17 @@ export default function UserStream() {
 		}
 	};
 
-	const addIce = async ice => {
+	const handleIce = data => {
 		try {
-			if (ice.candidate) {
-				await pc.addIceCandidate(ice.candidate);
-			}
+			socket.emit('ice', data.candidate);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const addIce = ice => {
+		try {
+			pc.addIceCandidate(ice);
 		} catch (err) {
 			console.log(err);
 		}
@@ -94,9 +99,10 @@ export default function UserStream() {
 	};
 
 	// RTC Socket Service Logic..
-	pc.onicecandidate = addIce;
 	pc.onaddstream = handleStream;
+	pc.onicecandidate = handleIce;
 
+	socket.on('peer_join', sendOffer);
 	socket.on('offer', receiveOffer);
 	socket.on('answer', receiveAnswer);
 	socket.on('ice', addIce);
@@ -105,6 +111,7 @@ export default function UserStream() {
 		if (!loading && stream) {
 			myVideoRef.current.srcObject = stream;
 			stream.getTracks().forEach(track => pc.addTrack(track, stream));
+			socket.emit('join_room');
 		}
 	}, [loading, stream]);
 
@@ -112,9 +119,7 @@ export default function UserStream() {
 		<Stream>
 			<Video ref={myVideoRef} autoPlay />
 			<Video ref={peermyVideoRef} autoPlay />
-
 			<ButtonWrap>
-				<Button onClick={sendOffer}>접속 시작!</Button>
 				<Button onClick={handleVideoToggle}>Video Toggle</Button>
 			</ButtonWrap>
 		</Stream>
