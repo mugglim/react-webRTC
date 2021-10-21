@@ -2,6 +2,19 @@ import React from 'react';
 import io from 'socket.io-client';
 
 const socket = io.connect('http://localhost:4000');
+const pc = new RTCPeerConnection({
+	iceServers: [
+		{
+			urls: [
+				'stun:stun.l.google.com:19302',
+				'stun:stun1.l.google.com:19302',
+				'stun:stun2.l.google.com:19302',
+				'stun:stun3.l.google.com:19302',
+				'stun:stun4.l.google.com:19302',
+			],
+		},
+	],
+});
 const SocketContext = React.createContext();
 
-export { SocketContext, socket };
+export { SocketContext, socket, pc };

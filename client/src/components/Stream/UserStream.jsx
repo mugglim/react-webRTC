@@ -14,6 +14,7 @@ const Video = styled.video`
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	border: 3px solid red;
 `;
 
 const Button = styled.button`
@@ -32,26 +33,88 @@ const ButtonWrap = styled.div`
 `;
 
 export default function UserStream() {
+	const { socket, pc } = useContext(SocketContext);
 	const { loading, stream } = useGetStream({ audio: true, video: true });
-	const videoRef = useRef(null);
-	const socket = useContext(SocketContext);
+	const myVideoRef = useRef(null);
+	const peermyVideoRef = useRef(null);
 
+	// Video Toggle
 	const handleVideoToggle = () => {
 		if (stream) {
 			stream.getVideoTracks().forEach(track => (track.enabled = !track.enabled));
+			console.log(stream);
 		}
 	};
 
+	// RTC Service Logic
+	const sendOffer = async () => {
+		try {
+			const offer = await pc.createOffer();
+			await pc.setLocalDescription(offer);
+			socket.emit('offer', offer);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const receiveOffer = async offer => {
+		try {
+			await pc.setRemoteDescription(offer);
+			const answer = await pc.createAnswer();
+			await pc.setLocalDescription(answer);
+			socket.emit('answer', answer);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const receiveAnswer = async answer => {
+		try {
+			await pc.setRemoteDescription(answer);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const addIce = async ice => {
+		try {
+			if (ice.candidate) {
+				await pc.addIceCandidate(ice.candidate);
+			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const handleStream = mediaStreamEvent => {
+		if (mediaStreamEvent) {
+			const peerStream = mediaStreamEvent.stream;
+			peermyVideoRef.current.srcObject = peerStream;
+		}
+	};
+
+	// RTC Socket Service Logic..
+	pc.onicecandidate = addIce;
+	pc.onaddstream = handleStream;
+
+	socket.on('offer', receiveOffer);
+	socket.on('answer', receiveAnswer);
+	socket.on('ice', addIce);
+
 	useEffect(() => {
-		if (!loading) {
-			videoRef.current.srcObject = stream;
+		if (!loading && stream) {
+			myVideoRef.current.srcObject = stream;
+			stream.getTracks().forEach(track => pc.addTrack(track, stream));
 		}
 	}, [loading, stream]);
 
 	return (
 		<Stream>
-			<Video ref={videoRef} autoPlay />
+			<Video ref={myVideoRef} autoPlay />
+			<Video ref={peermyVideoRef} autoPlay />
+
 			<ButtonWrap>
+				<Button onClick={sendOffer}>접속 시작!</Button>
 				<Button onClick={handleVideoToggle}>Video Toggle</Button>
 			</ButtonWrap>
 		</Stream>
