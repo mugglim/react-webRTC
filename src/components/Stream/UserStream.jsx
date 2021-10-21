@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { useGetStream } from '../../hooks/stream';
 
 const Stream = styled.div`
-	width: 400px;
-	height: 400px;
+	width: 300px;
+	height: 300px;
 	border: 1px solid black;
 `;
 
@@ -15,14 +15,14 @@ const Video = styled.video`
 `;
 
 export default function UserStream() {
-	const stream = useGetStream({ audio: true, video: true });
+	const { loading, stream } = useGetStream({ audio: true, video: true });
 	const videoRef = useRef(null);
 
 	useEffect(() => {
-		if (stream) {
+		if (!loading && stream) {
 			videoRef.current.srcObject = stream;
 		}
-	}, [stream]);
+	}, [loading, stream]);
 
 	return (
 		<Stream>
