@@ -1,5 +1,8 @@
+import React from 'react';
+import UserStream from './components/Stream/UserStream';
+
 function App() {
-	return <div className="App">Hello :D</div>;
+	return <UserStream></UserStream>;
 }
 
 export default App;
