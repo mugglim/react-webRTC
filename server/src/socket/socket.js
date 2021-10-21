@@ -1,4 +1,9 @@
 const socketController = socket => {
+	console.log('User Connected 🚀');
+
+	socket.on('message', message => {
+		console.log(message);
+	});
 	// Get Stream -> new RTCPeerConnection -> Create Offer
 	// socket.on('join_room', roomName => {
 	// 	socket.join(roomName);

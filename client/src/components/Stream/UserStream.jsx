@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { useGetStream } from '../../hooks/stream';
+import { SocketContext } from '../../context/socket';
 
 const Stream = styled.div`
 	width: 300px;
@@ -33,6 +34,7 @@ const ButtonWrap = styled.div`
 export default function UserStream() {
 	const { loading, stream } = useGetStream({ audio: true, video: true });
 	const videoRef = useRef(null);
+	const socket = useContext(SocketContext);
 
 	const handleVideoToggle = () => {
 		if (stream) {

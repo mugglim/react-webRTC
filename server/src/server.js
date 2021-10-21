@@ -4,10 +4,14 @@ import SocketIO from 'socket.io';
 import socketController from './socket/socket.js';
 
 const app = express();
-const httpServer = http.createServer(app);
-const wsServer = SocketIO(httpServer);
-
 app.set('port', 4000);
+
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer, {
+	cors: {
+		origin: 'http://localhost:3000',
+	},
+});
 
 wsServer.on('connection', socketController);
 
