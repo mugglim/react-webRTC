@@ -1,0 +1,23 @@
+{
+	"name": "react-webrect-server",
+	"version": "1.0.0",
+	"description": "Study WebRTC !!",
+	"license": "MIT",
+	"scripts": {
+		"dev": "nodemon"
+	},
+	"dependencies": {
+		"@babel/preset-env": "^7.15.8",
+		"express": "^4.17.1",
+		"localtunnel": "^2.0.2",
+		"nodemon": "^2.0.13",
+		"pug": "^3.0.2",
+		"socket.io": "^4.3.1",
+		"ws": "^8.2.3"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.15.7",
+		"@babel/core": "^7.15.8",
+		"@babel/node": "^7.15.8"
+	}
+}
