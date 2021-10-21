@@ -11,6 +11,7 @@ const Stream = styled.div`
 const Video = styled.video`
 	width: 100%;
 	height: 100%;
+	object-fit: cover;
 `;
 
 export default function UserStream() {
