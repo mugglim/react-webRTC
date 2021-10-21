@@ -8,7 +8,6 @@ const socketController = socket => {
 
 	// // PeerA -> PeerB
 	socket.on('offer', offer => {
-		console.log(offer, ' !!');
 		socket.broadcast.emit('offer', offer);
 	});
 
