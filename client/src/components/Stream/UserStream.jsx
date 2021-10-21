@@ -1,20 +1,17 @@
-import React, { useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { useGetStream } from '../../hooks/stream';
 import { SocketContext } from '../../context/socket';
+import Video from './Video';
 
 const Stream = styled.div`
-	width: 300px;
-	height: 300px;
-	border: 1px solid black;
-	position: relative;
-`;
-
-const Video = styled.video`
 	width: 100%;
 	height: 100%;
-	object-fit: cover;
-	border: 3px solid red;
+	border: 1px solid black;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
 `;
 
 const Button = styled.button`
@@ -32,11 +29,17 @@ const ButtonWrap = styled.div`
 	transform: translateX(-50%);
 `;
 
+const Row = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+`;
+
 export default function UserStream() {
 	const { socket, pc } = useContext(SocketContext);
 	const { loading, stream } = useGetStream({ audio: true, video: true });
-	const myVideoRef = useRef(null);
-	const peermyVideoRef = useRef(null);
+	const [peerStream, setPeerStream] = useState(false);
 
 	// Video Toggle
 	const handleVideoToggle = () => {
@@ -94,7 +97,7 @@ export default function UserStream() {
 	const handleStream = mediaStreamEvent => {
 		if (mediaStreamEvent) {
 			const peerStream = mediaStreamEvent.stream;
-			peermyVideoRef.current.srcObject = peerStream;
+			setPeerStream(peerStream);
 		}
 	};
 
@@ -109,19 +112,28 @@ export default function UserStream() {
 
 	useEffect(() => {
 		if (!loading && stream) {
-			myVideoRef.current.srcObject = stream;
-			stream.getTracks().forEach(track => pc.addTrack(track, stream));
+			if (pc.getSenders().length === 0) {
+				stream.getTracks().forEach(track => pc.addTrack(track, stream));
+			}
 			socket.emit('join_room');
 		}
 	}, [loading, stream]);
 
 	return (
 		<Stream>
-			<Video ref={myVideoRef} autoPlay />
-			<Video ref={peermyVideoRef} autoPlay />
-			<ButtonWrap>
-				<Button onClick={handleVideoToggle}>Video Toggle</Button>
-			</ButtonWrap>
+			<h2>나의 비디오</h2>
+			<Row>
+				{stream && (
+					<>
+						<Video stream={stream} />
+						<ButtonWrap>
+							<Button onClick={handleVideoToggle}>Video Toggle</Button>
+						</ButtonWrap>
+					</>
+				)}
+			</Row>
+			<h2>Peer의 비디오</h2>
+			<Row>{peerStream && <Video stream={peerStream} />}</Row>
 		</Stream>
 	);
 }
